@@ -5,11 +5,16 @@ import com.imtiyazzaman.zookeeper.playground.process.DistributedProcess;
 import com.imtiyazzaman.zookeeper.playground.process.DistributedProcessRepository;
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.runtime.StartupEvent;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.retry.RetryForever;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+
+import static com.imtiyazzaman.zookeeper.playground.config.Constants.ZK_ADDRESS;
 
 @ApplicationScoped
 public class LifecycleBean {
@@ -37,7 +42,6 @@ public class LifecycleBean {
 
     void onStop(@Observes ShutdownEvent ev) {
         LOG.info("Shutting down application...");
-
 
         LOG.info("Cluster dropped... shutting down");
     }

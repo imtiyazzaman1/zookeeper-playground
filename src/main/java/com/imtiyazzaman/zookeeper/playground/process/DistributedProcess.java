@@ -1,6 +1,7 @@
 package com.imtiyazzaman.zookeeper.playground.process;
 
 import com.imtiyazzaman.zookeeper.playground.coordinator.Coordinator;
+import com.imtiyazzaman.zookeeper.playground.model.Resource;
 import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
@@ -10,12 +11,13 @@ public class DistributedProcess {
     private static final Logger LOG = Logger.getLogger(DistributedProcess.class);
 
     List<String> resources = new ArrayList<>();
-    Coordinator coordinator = new Coordinator();
+    Coordinator coordinator;
 
     String id;
 
     public DistributedProcess(String id) {
         this.id = id;
+        this.coordinator = new Coordinator(id);
     }
 
     public void start() {
@@ -29,5 +31,9 @@ public class DistributedProcess {
 
     public String getId() {
         return id;
+    }
+
+    public void add(Resource resource) {
+        coordinator.addNewResource(resource);
     }
 }
