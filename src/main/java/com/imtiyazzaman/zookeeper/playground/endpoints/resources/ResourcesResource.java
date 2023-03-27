@@ -1,4 +1,4 @@
-package com.imtiyazzaman.zookeeper.playground.endpoints;
+package com.imtiyazzaman.zookeeper.playground.endpoints.resources;
 
 import com.imtiyazzaman.zookeeper.playground.model.Resource;
 import com.imtiyazzaman.zookeeper.playground.process.DistributedProcessRepository;

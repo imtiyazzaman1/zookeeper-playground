@@ -1,4 +1,4 @@
-package com.imtiyazzaman.zookeeper.playground.endpoints;
+package com.imtiyazzaman.zookeeper.playground.endpoints.resources;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

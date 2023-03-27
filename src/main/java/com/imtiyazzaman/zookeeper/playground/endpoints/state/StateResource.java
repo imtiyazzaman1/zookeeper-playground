@@ -1,4 +1,4 @@
-package com.imtiyazzaman.zookeeper.playground.endpoints;
+package com.imtiyazzaman.zookeeper.playground.endpoints.state;
 
 import com.imtiyazzaman.zookeeper.playground.coordinator.Coordinator;
 import com.imtiyazzaman.zookeeper.playground.state.State;
