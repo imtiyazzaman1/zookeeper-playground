@@ -1,6 +1,6 @@
 # Helix Playground
 
-A playground project for getting to grips with ZooKeeper. In particuluar, looking at how state management can be driven by resources being added to a process and having that propogate to ZooKeeper and notify the relevant nodes.
+A playground project for getting to grips with ZooKeeper. In particuluar, looking at how state management can be driven by resources being added to a nodes and having that propogate to ZooKeeper and notify other nodes.
 
 ## Run It
 1. `docker-compose up`
