@@ -1,5 +1,6 @@
 package com.imtiyazzaman.zookeeper.playground.process;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.imtiyazzaman.zookeeper.playground.coordinator.Coordinator;
 import com.imtiyazzaman.zookeeper.playground.model.Resource;
 import org.jboss.logging.Logger;
@@ -10,9 +11,11 @@ import java.util.List;
 public class DistributedProcess {
     private static final Logger LOG = Logger.getLogger(DistributedProcess.class);
 
+    @JsonProperty
     List<String> resources = new ArrayList<>();
     Coordinator coordinator;
 
+    @JsonProperty
     String id;
 
     public DistributedProcess(String id) {
