@@ -4,7 +4,9 @@ import com.imtiyazzaman.zookeeper.playground.model.Resource;
 import com.imtiyazzaman.zookeeper.playground.state.State;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.api.CuratorWatcher;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.AddWatchMode;
 import org.jboss.logging.Logger;
 
 import java.nio.charset.StandardCharsets;
@@ -63,9 +65,22 @@ public class Coordinator {
     public void addNewResource(Resource resource) {
         try {
             String partitionPath = BASE_PATH + "/" + resource.partition();
-            client.createContainers(partitionPath + "/" + resource.resourceName());
+            String resourcePath = partitionPath + "/" + resource.resourceName();
+
+            client.createContainers(resourcePath);
+            byte[] idBytes = processId.getBytes(StandardCharsets.UTF_8);
+
+            String partitionOwner = new String(client.getData()
+                    .forPath(partitionPath));
+
+            if (! processId.equals(partitionOwner)) {
+                LOG.warn(processId + " is taking control over partition: " + resource.partition());
+                client.setData()
+                        .forPath(partitionPath, idBytes);
+            }
+
             client.setData()
-                    .forPath(partitionPath, processId.getBytes(StandardCharsets.UTF_8));
+                    .forPath(resourcePath, idBytes);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
