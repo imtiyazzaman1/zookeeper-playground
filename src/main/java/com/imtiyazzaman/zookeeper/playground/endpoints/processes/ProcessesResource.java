@@ -1,5 +1,6 @@
 package com.imtiyazzaman.zookeeper.playground.endpoints.processes;
 
+import com.imtiyazzaman.zookeeper.playground.model.Resource;
 import com.imtiyazzaman.zookeeper.playground.process.DistributedProcess;
 import com.imtiyazzaman.zookeeper.playground.process.DistributedProcessRepository;
 
@@ -39,4 +40,19 @@ public class ProcessesResource {
 
         return Response.ok().build();
     }
+
+    @POST
+    @Path("/{processId}/assign-resource")
+    public Response assignResource(@PathParam("processId") String processId, Resource resource) {
+        if (! processRepository.contains(processId)) {
+            return Response.status(404).build();
+        }
+
+        DistributedProcess process = processRepository.get(processId);
+
+        process.add(resource);
+
+        return Response.ok().build();
+    }
+
 }
