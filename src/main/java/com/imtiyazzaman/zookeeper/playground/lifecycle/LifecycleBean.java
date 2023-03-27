@@ -34,7 +34,7 @@ public class LifecycleBean {
         DistributedProcess p2 = new DistributedProcess("node-2");
 
         processRepository.put(p1.getId(), p1);
-        processRepository.put(p2.getId(), p1);
+        processRepository.put(p2.getId(), p2);
 
         p1.start();
         p2.start();

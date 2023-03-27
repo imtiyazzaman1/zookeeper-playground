@@ -5,14 +5,15 @@ import com.imtiyazzaman.zookeeper.playground.coordinator.Coordinator;
 import com.imtiyazzaman.zookeeper.playground.model.Resource;
 import org.jboss.logging.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class DistributedProcess {
     private static final Logger LOG = Logger.getLogger(DistributedProcess.class);
 
     @JsonProperty
-    List<String> resources = new ArrayList<>();
+    Set<Resource> resources = new HashSet<>();
+    @JsonProperty
+    Set<String> partitions = new HashSet<>();
     Coordinator coordinator;
 
     @JsonProperty
@@ -36,7 +37,21 @@ public class DistributedProcess {
         return id;
     }
 
+    public void addAllResources(Collection<Resource> resources) {
+        resources.forEach(this::add);
+    }
     public void add(Resource resource) {
+        LOG.info("Processing new resource: " + resource)
+        ;
         coordinator.addNewResource(resource);
+        resources.add(resource);
+    }
+
+
+    public void assignPartition(String partition) {
+        List<Resource> resourcesFromNewPartition = coordinator.assignPartiton(partition);
+
+        partitions.add(partition);
+        addAllResources(resourcesFromNewPartition);
     }
 }

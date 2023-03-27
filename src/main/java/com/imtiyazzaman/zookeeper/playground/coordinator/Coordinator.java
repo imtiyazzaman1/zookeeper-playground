@@ -5,7 +5,7 @@ import com.imtiyazzaman.zookeeper.playground.state.State;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.zookeeper.data.Stat;
+import org.jboss.logging.Logger;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -15,6 +15,7 @@ import static com.imtiyazzaman.zookeeper.playground.config.Constants.ZK_ADDRESS;
 
 public class Coordinator {
 
+    private static final Logger LOG = Logger.getLogger(Coordinator.class);
     public static final String BASE_PATH = "/zk-playground/partitions";
     private final CuratorFramework client;
     private final String processId;
@@ -66,6 +67,24 @@ public class Coordinator {
             client.setData()
                     .forPath(partitionPath, processId.getBytes(StandardCharsets.UTF_8));
 
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Resource> assignPartiton(String partition) {
+        try {
+            String partitionPath = BASE_PATH + "/" + partition;
+            LOG.info("Assigning partition: " + partition + " to node: " + processId);
+            client.setData()
+                    .forPath(partitionPath);
+
+            LOG.info("Fetching resources for partition: " + partition);
+            return client.getChildren()
+                    .forPath(partitionPath)
+                    .stream()
+                    .map(resource -> new Resource(resource, partition))
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

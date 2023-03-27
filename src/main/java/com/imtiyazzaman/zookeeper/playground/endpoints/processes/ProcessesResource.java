@@ -5,7 +5,10 @@ import com.imtiyazzaman.zookeeper.playground.process.DistributedProcessRepositor
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Path("/processes")
@@ -20,5 +23,20 @@ public class ProcessesResource {
     @GET
     public List<DistributedProcess> getAllProcesses() {
         return processRepository.getAll();
+    }
+
+    @POST
+    @Path("/{processId}/assign-partition")
+    public Response assignPartition(@PathParam("processId") String processId,
+                                    AssignPartitionRequest assignPartitionRequest) {
+        if (! processRepository.contains(processId)) {
+            return Response.status(404).build();
+        }
+
+        DistributedProcess process = processRepository.get(processId);
+
+        process.assignPartition(assignPartitionRequest.partition);
+
+        return Response.ok().build();
     }
 }
