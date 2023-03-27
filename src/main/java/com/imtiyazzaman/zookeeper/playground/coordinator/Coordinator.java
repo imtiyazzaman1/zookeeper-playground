@@ -40,7 +40,7 @@ public class Coordinator {
     public void stop() {
     }
 
-    public List<State> getClusterState() {
+    public ClusterState getClusterState() {
         List<String> partitions = null;
         try {
             partitions = client.getChildren().forPath(BASE_PATH);
@@ -48,18 +48,38 @@ public class Coordinator {
             throw new RuntimeException(e);
         }
 
-        return partitions.stream().map(partition -> {
-                    try {
-                        String partitionPath = BASE_PATH + "/" + partition;
-                        String assignedNode = new String(client.getData().forPath(partitionPath));
-                        List<String> resources = client.getChildren().forPath(partitionPath);
+        Map<String, String> partitionMap = new HashMap<>();
+        Map<String, Resource> resourceMap = new HashMap<>();
 
-                        return new State(partition, assignedNode, resources);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .collect(Collectors.toList());
+        ClusterState clusterState = new ClusterState(partitionMap, resourceMap);
+
+        partitions.stream().forEach(partition -> {
+            try {
+                String partitionPath = BASE_PATH + "/" + partition;
+                String assignedNode = new String(client.getData().forPath(partitionPath));
+
+                partitionMap.put(partition, assignedNode);
+
+                client.getChildren()
+                        .forPath(partitionPath)
+                        .forEach(resource -> {
+                            byte[] bytes = new byte[0];
+                            try {
+                                bytes = client.getData().forPath(partitionPath + "/" + resource);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+
+                            resourceMap.put(new String(bytes), new Resource(resource, partition));
+                        });
+
+
+            } catch (Exception e) {
+
+            }
+        });
+
+        return clusterState;
     }
 
     public void addNewResource(Resource resource) {

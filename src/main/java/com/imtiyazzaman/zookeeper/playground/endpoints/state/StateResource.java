@@ -1,7 +1,7 @@
 package com.imtiyazzaman.zookeeper.playground.endpoints.state;
 
 import com.imtiyazzaman.zookeeper.playground.coordinator.Coordinator;
-import com.imtiyazzaman.zookeeper.playground.state.State;
+import com.imtiyazzaman.zookeeper.playground.state.ClusterState;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -17,7 +17,7 @@ public class StateResource {
     }
 
     @GET
-    public List<State> getState() {
+    public ClusterState getState() {
         return coordinator.getClusterState();
     }
 }
