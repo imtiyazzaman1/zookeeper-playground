@@ -2,11 +2,12 @@ package com.imtiyazzaman.zookeeper.playground.process;
 
 import javax.inject.Singleton;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 public class DistributedProcessRepository {
 
-    private final Map<String, DistributedProcess> processMap = new HashMap<>();
+    private final Map<String, DistributedProcess> processMap = new ConcurrentHashMap<>();
 
     public DistributedProcess get(String id) {
         return processMap.get(id);

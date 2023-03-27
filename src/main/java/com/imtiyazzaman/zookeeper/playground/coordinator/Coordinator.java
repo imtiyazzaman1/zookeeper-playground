@@ -1,5 +1,6 @@
 package com.imtiyazzaman.zookeeper.playground.coordinator;
 
+import com.imtiyazzaman.zookeeper.playground.listener.PartitionOwnershipChangeEvent;
 import com.imtiyazzaman.zookeeper.playground.listener.PartitionOwnershipChangeListener;
 import com.imtiyazzaman.zookeeper.playground.listener.ResourceOwnershipChangeEvent;
 import com.imtiyazzaman.zookeeper.playground.listener.ResourceOwnershipChangeListener;
@@ -16,6 +17,7 @@ import org.jboss.logging.Logger;
 
 import java.awt.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,11 +64,11 @@ public class Coordinator {
         }
 
         Map<String, String> partitionMap = new HashMap<>();
-        Map<String, Resource> resourceMap = new HashMap<>();
+        Map<String, List<Resource>> resourceMap = new HashMap<>();
 
         ClusterState clusterState = new ClusterState(partitionMap, resourceMap);
 
-        partitions.stream().forEach(partition -> {
+        partitions.forEach(partition -> {
             try {
                 String partitionPath = BASE_PATH + "/" + partition;
                 String assignedNode = new String(client.getData().forPath(partitionPath));
@@ -83,7 +85,10 @@ public class Coordinator {
                                 throw new RuntimeException(e);
                             }
 
-                            resourceMap.put(new String(bytes), new Resource(resource, partition));
+                            String node = new String(bytes);
+
+                            resourceMap.computeIfAbsent(node, k -> new ArrayList<>());
+                            resourceMap.get(node).add(new Resource(resource, partition));
                         });
 
 
@@ -147,12 +152,37 @@ public class Coordinator {
             client.createContainers(partitionPath);
             client.setData().forPath(partitionPath, processIdBytes);
 
+            CuratorWatcher watcher = event -> {
+                if (event.getType().equals(Watcher.Event.EventType.NodeDataChanged)) {
+                    byte[] bytes = client.getData().forPath(partitionPath);
+
+                    String owner = new String(bytes);
+
+                    if (!owner.equals(processId)) {
+                        PartitionOwnershipChangeEvent resourceOwnershipChangeEvent =
+                                new PartitionOwnershipChangeEvent(owner, partition);
+
+                        partitionOwnershipChangeListener.onChange(resourceOwnershipChangeEvent);
+                    }
+                }
+            };
+
+            client.watchers()
+                    .add()
+                    .withMode(AddWatchMode.PERSISTENT)
+                    .usingWatcher(watcher)
+                    .forPath(partitionPath);
+
             LOG.info("Fetching resources for partition: " + partition);
-            return client.getChildren()
+            List<Resource> resources = client.getChildren()
                     .forPath(partitionPath)
                     .stream()
                     .map(resource -> new Resource(resource, partition))
                     .collect(Collectors.toList());
+
+            resources.forEach(this::addNewResource);
+
+            return resources;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
